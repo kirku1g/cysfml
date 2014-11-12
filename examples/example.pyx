@@ -1,4 +1,4 @@
-from system cimport (
+from cysfml.system cimport (
     Clock,
     Clock_create,
     sleep_seconds,

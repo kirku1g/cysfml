@@ -1,6 +1,6 @@
 from random import randint
 
-from cysfml.example import (
+from examples.example import (
     Example,
     example_from_args,
 )
@@ -40,7 +40,7 @@ class ExampleColor(Example):
     
     def example_color(self):
         window, circle_shape = self._setup_window()
-        self.output('Colors can be created by calling either the graphics.create_color_from_rgb(r, g, b)...')
+        self.output('Colors can be created by calling either the graphics.Color_from_rgb(r, g, b)...')
         color = Color_from_rgb(255, 255, 255)
         for r in range(0, 255, 2):
             circle_shape.fill_color = r, 0, 0
@@ -51,7 +51,7 @@ class ExampleColor(Example):
         for b in range(0, 255, 2):
             circle_shape.fill_color = 0, 0, b, 255
             self._render(window, circle_shape)
-        self.output('Or graphics.create_color_from_rgba(r, g, b, a) for alpha-channel opacity...')
+        self.output('Or graphics.Color_from_rgba(r, g, b, a) for alpha-channel opacity...')
         for a in range(255, 0, -2):
             circle_shape.fill_color = Color_from_rgba(
                 randint(128, 255),
@@ -59,17 +59,17 @@ class ExampleColor(Example):
                 randint(128, 255),
                 a,
             )
-        self.output('Colors can be added, i.e. component-wise saturated addition, by calling graphics.color_add(color1, color2)...')
+        self.output('Colors can be added, i.e. component-wise saturated addition, by calling graphics.Color_add(color1, color2)...')
         red = Color_from_rgb(255, 0, 0)
         blue_addition = Color_from_rgb(0, 0, 2)
         for x in range(0, 255, 2):
             red = Color_add(red, blue_addition)
             circle_shape.fill_color = red
             self._render(window, circle_shape)
-        self.output('Colors can be added, i.e. component-wise multiplication, by calling graphics.color_add(color1, color2)...')
 
 
 if __name__ == '__main__':
     example_from_args({
         'python': ExampleColor,
     }).run()
+

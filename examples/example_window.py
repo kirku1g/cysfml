@@ -1,6 +1,6 @@
 from random import choice, randint
 
-from cysfml.example import (
+from examples.example import (
     Example,
     example_from_args,
 )
@@ -32,7 +32,7 @@ class ExampleWindow(Example):
         return Window(video_mode, name)
     
     def example_create_a_window(self):
-        self.output('Create a window by calling graphics.create_window()...')
+        self.output('Create a window by calling graphics.Window()...')
         window = self._create_window(b'Example Window')
         self.output('Check if a window is open by calling window.is_open()...')
         self.output('window.is_open() == %s...' % window.is_open())
@@ -85,7 +85,7 @@ class ExampleWindow(Example):
         
         self.output('The size of a window is returned by window.get_size(), window.get_size_xy() and window.size...')
         width, height = window.get_size_xy()
-        self.output("window.get_size() == %s (Vector2u)" % window.get_size())
+        self.output("window.get_size() == %s (Vector2u)" % (window.get_size(),))
         self.output("window.get_size_xy() == %s (tuple)" % ((width, height),))
         self.output("window.size == %s (tuple)" % (window.size,))
         

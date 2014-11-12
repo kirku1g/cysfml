@@ -1,15 +1,10 @@
-from cysfml.cexample_window import ExampleWindow as CExampleWindow
 
-from cysfml.example import (
+from examples.example import (
     Example,
     example_from_args,
 )
-from cysfml.system import (
-    create_vector2i,
-    create_vector2u,
-)
 from cysfml.window import (
-    create_video_mode,
+    VideoMode,
     fullscreen_modes,
 )
 
@@ -23,17 +18,17 @@ class ExampleVideoMode(Example):
     
     def example_create_a_video_mode(self):
         self.output('VideoModes are primarily used for creating windows...')
-        self.output('Create a VideoMode by calling window.create_video_mode(320, 240, 32)...')
-        video_mode = create_video_mode(320, 240, 32)
+        self.output('Create a VideoMode by calling window.VideoMode(320, 240, 32)...')
+        video_mode = VideoMode(320, 240, 32)
         self.output('video_mode.get_bits_per_pixel() == video_mode.bits_per_pixel == %d' % video_mode.bits_per_pixel)
         self.output('video_mode.get_width() == video_mode.width == %d' % video_mode.width)
         self.output('video_mode.get_height() == video_mode.height == %d' % video_mode.height)
     
     def example_check_if_a_video_mode_is_valid(self):
         self.output('We can check if a video mode is valid by calling video_mode.is_valid()...')
-        video_mode = create_video_mode(640, 480, 32)
+        video_mode = VideoMode(640, 480, 32)
         self.output('%s.is_valid() == video_mode.valid == %s' % (repr(video_mode), video_mode.is_valid()))
-        video_mode = create_video_mode(475, 112, 17)
+        video_mode = VideoMode(475, 112, 17)
         self.output('%s.is_valid() == video_mode.valid == %s' % (repr(video_mode), video_mode.is_valid()))
     
     def example_list_fullscreen_modes(self):

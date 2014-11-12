@@ -1,3 +1,4 @@
+
 from Cython.Build import cythonize
 
 from setuptools import setup, Extension
@@ -22,22 +23,3 @@ setup(
 )
 
 
-
-#hi = 3
-#lo = 0
-#mid = 1
-#current_time = 2
-
-#if 0 > 2:
-    #hi = 1
-#else:
-    #lo = 1 + 1
-    
-#mid = (2 + 3) / 2 == 2
-
-#if 0 > 1:
-    #...
-#else:
-    #lo = 2 + 1
-
-#a.insert(3, item)

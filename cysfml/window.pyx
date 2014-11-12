@@ -79,6 +79,10 @@ cdef class Joystick:
     def __cinit__(Joystick self, unsigned int number):
         self.number = number
     
+    @staticmethod
+    def update(Joystick self):
+        cwindow.Joystick_update()
+    
     # connected
     
     cpdef bint is_connected(Joystick self):

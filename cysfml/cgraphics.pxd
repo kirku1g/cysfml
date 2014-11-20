@@ -81,10 +81,9 @@ cdef extern from 'SFML/Graphics/Rect.h' nogil:
     
     cdef bint FloatRect_contains 'sfFloatRect_contains' (const FloatRect* rect, float x, float y)
     cdef bint IntRect_contains 'sfIntRect_contains' (const IntRect* rect, int x, int y)
-    
     cdef bint FloatRect_intersects 'sfFloatRect_intersects' (const FloatRect* rect1, const FloatRect* rect2, FloatRect* intersection)
     cdef bint IntRect_intersects 'sfIntRect_intersects' (const IntRect* rect1, const IntRect* rect2, IntRect* intersection)
- 
+
 
 # SFML/Graphics/View.h
 ################################################################################
@@ -111,7 +110,6 @@ cdef extern from 'SFML/Graphics/View.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Color.h' nogil:
-    
     ctypedef struct Color 'sfColor':
         unsigned int r
         unsigned int g
@@ -127,10 +125,8 @@ cdef extern from 'SFML/Graphics/Color.h' nogil:
     cdef Color COLOR_MAGENTA 'sfMagenta'
     cdef Color COLOR_CYAN 'sfCyan'
     cdef Color COLOR_TRANSPARENT 'sfTransparent'
-    
     cdef Color Color_from_rgb 'sfColor_fromRGB' (unsigned int red, unsigned int green, unsigned int blue)
     cdef Color Color_from_rgba 'sfColor_fromRGBA'(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha)
-    
     cdef Color Color_add 'sfColor_add' (Color color1, Color color2)
     cdef Color Color_modulate 'sfColor_modulate' (Color color1, Color color2)
 
@@ -139,7 +135,6 @@ cdef extern from 'SFML/Graphics/Color.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Vertex.h' nogil:
-    
     ctypedef struct Vertex 'sfVertex':
         Vector2f position
         Color color
@@ -158,7 +153,7 @@ cdef extern from 'SFML/Graphics/VertexArray.h' nogil:
     cdef void VertexArray_clear 'sfVertexArray_clear' (VertexArray* vertexArray)
     cdef void VertexArray_resize 'sfVertexArray_resize' (VertexArray* vertexArray, unsigned int vertexCount)
     cdef void VertexArray_append 'sfVertexArray_append' (VertexArray* vertexArray, Vertex vertex)
-    cdef void VertexArray_set_primitive_type 'sfVertexArray_setPrimitiveType' (VertexArray* vertexArray, PrimitiveType type)
+    cdef void VertexArray_set_primitive_type 'sfVertexArray_setPrimitiveType' (VertexArray* vertexArray, int type)#PrimitiveType type)
     cdef PrimitiveType VertexArray_get_primitive_type 'sfVertexArray_getPrimitiveType' (VertexArray* vertexArray)
     cdef FloatRect VertexArray_get_bounds 'sfVertexArray_getBounds' (VertexArray* vertexArray)
 
@@ -167,7 +162,6 @@ cdef extern from 'SFML/Graphics/VertexArray.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Glyph.h' nogil:
-    
     ctypedef struct Glyph 'sfGlyph':
         int advance
         IntRect bounds
@@ -178,10 +172,9 @@ cdef extern from 'SFML/Graphics/Glyph.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Transform.h' nogil:
-    
     ctypedef struct Transform 'sfTransform':
         float matrix[9]
-
+    
     cdef const Transform TRANSFORM_IDENTITY 'sfTransform_Identity'
     
     cdef Transform Transform_from_matrix 'sfTransform_fromMatrix' (
@@ -189,7 +182,6 @@ cdef extern from 'SFML/Graphics/Transform.h' nogil:
         float a10, float a11, float a12,
         float a20, float a21, float a22,
     )
-
     cdef void Transform_get_matrix 'sfTransform_getMatrix' (const Transform* transform, float* matrix)
     cdef Transform Transform_get_inverse 'sfTransform_getInverse' (const Transform* transform)
     cdef FloatRect Transform_transform_rect 'sfTransform_transformRect' (const Transform* transform, FloatRect rectangle)
@@ -227,12 +219,10 @@ cdef extern from 'SFML/Graphics/Transformable.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Shape.h' nogil:
-    
     ctypedef unsigned int (*ShapeGetPointCountCallback 'sfShapeGetPointCountCallback')(void*)
     ctypedef Vector2f (*ShapeGetPointCallback 'sfShapeGetPointCallback')(unsigned int, void*)
     
     cdef Shape* Shape_create (ShapeGetPointCountCallback getPointCount, ShapeGetPointCallback getPoint, void* userData)
-    
     cdef void Shape_destroy 'sfShape_destroy' (Shape* shape)
     cdef void Shape_set_position 'sfShape_setPosition' (Shape* shape, Vector2f position)
     cdef void Shape_set_rotation 'sfShape_setRotation' (Shape* shape, float angle)
@@ -268,7 +258,6 @@ cdef extern from 'SFML/Graphics/Shape.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/CircleShape.h' nogil:
-    
     cdef CircleShape* CircleShape_create 'sfCircleShape_create' ()
     cdef CircleShape* CircleShape_copy 'sfCircleShape_copy' (CircleShape* shape)
     cdef void CircleShape_destroy 'sfCircleShape_destroy' (CircleShape* shape)
@@ -308,7 +297,6 @@ cdef extern from 'SFML/Graphics/CircleShape.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/RectangleShape.h' nogil:
-    
     cdef RectangleShape* RectangleShape_create 'sfRectangleShape_create' ()
     cdef RectangleShape* RectangleShape_copy 'sfRectangleShape_copy' (RectangleShape* shape)
     cdef void RectangleShape_destroy 'sfRectangleShape_destroy' (RectangleShape* shape)
@@ -347,7 +335,6 @@ cdef extern from 'SFML/Graphics/RectangleShape.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/ConvexShape.h' nogil:
-    
     cdef ConvexShape* ConvexShape_create 'sfConvexShape_create' ()
     cdef ConvexShape* ConvexShape_copy 'sfConvexShape_copy' (ConvexShape* shape)
     cdef void ConvexShape_destroy 'sfConvexShape_destroy' (ConvexShape* shape)
@@ -380,13 +367,12 @@ cdef extern from 'SFML/Graphics/ConvexShape.h' nogil:
     cdef void ConvexShape_set_point 'sfConvexShape_setPoint' (const ConvexShape* shape, unsigned int index, Vector2f point)
     cdef FloatRect ConvexShape_get_local_bounds 'sfConvexShape_getLocalBounds' (ConvexShape* shape)
     cdef FloatRect ConvexShape_get_global_bounds 'sfConvexShape_getGlobalBounds' (ConvexShape* shape)
-   
-    
+
+
 # SFML/Graphics/Font.h
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Font.h' nogil:
-    
     cdef Font* Font_create_from_file 'sfFont_createFromFile' (const char* filename)
     cdef Font* Font_create_from_memory 'sfFont_createFromMemory' (const void* data, size_t sizeInBytes)
     cdef Font* Font_create_from_stream 'sfFont_createFromStream' (InputStream* stream)
@@ -402,7 +388,6 @@ cdef extern from 'SFML/Graphics/Font.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Image.h' nogil:
-    
     cdef Image* Image_create 'sfImage_create' (unsigned int width, unsigned int height)
     cdef Image* Image_create_from_color 'sfImage_createFromColor' (unsigned int width, unsigned int height, Color color)
     cdef Image* Image_create_from_pixels 'sfImage_createFromPixels' (unsigned int width, unsigned int height, const Uint8* pixels)
@@ -450,13 +435,12 @@ cdef extern from 'SFML/Graphics/Sprite.h' nogil:
     cdef Color Sprite_get_color 'sfSprite_getColor' (Sprite* sprite)
     cdef FloatRect Sprite_get_local_bounds 'sfSprite_getLocalBounds' (Sprite* sprite)
     cdef FloatRect Sprite_get_global_bounds 'sfSprite_getGlobalBounds' (Sprite* sprite)
-    
+
 
 # SFML/Graphics/RenderStates.h
 ################################################################################
 
 cdef extern from 'SFML/Graphics/RenderStates.h' nogil:
-    
     ctypedef struct RenderStates 'sfRenderStates':
         BlendMode blend_mode 'blendMode'
         Transform transform
@@ -468,7 +452,6 @@ cdef extern from 'SFML/Graphics/RenderStates.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/Texture.h' nogil:
-    
     cdef Texture* Texture_create 'sfTexture_create' (unsigned int width, unsigned int height)
     cdef Texture* Texture_create_from_file 'sfTexture_createFromFile' (const char* filename, const IntRect* area)
     cdef Texture* Texture_create_from_memory 'sfTexture_createFromMemory' (const void* data, size_t sizeInBytes, const IntRect* area)
@@ -495,7 +478,6 @@ cdef extern from 'SFML/Graphics/Texture.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/RenderTexture.h' nogil:
-    
     cdef RenderTexture* RenderTexture_create 'sfRenderTexture_create' (unsigned int width, unsigned int height, bint depthBuffer)
     cdef void RenderTexture_destroy 'sfRenderTexture_destroy' (RenderTexture* renderTexture)
     cdef Vector2u RenderTexture_get_size 'sfRenderTexture_getSize' (const RenderTexture* renderTexture)
@@ -508,7 +490,6 @@ cdef extern from 'SFML/Graphics/RenderTexture.h' nogil:
     cdef IntRect RenderTexture_get_viewport 'sfRenderTexture_getViewport' (const RenderTexture* renderTexture, const View* view)
     cdef Vector2f RenderTexture_map_pixel_to_coords 'sfRenderTexture_mapPixelToCoords' (const RenderTexture* renderTexture, Vector2i point, const View* view)
     cdef Vector2i RenderTexture_map_coords_to_pixel 'sfRenderTexture_mapCoordsToPixel' (const RenderTexture* renderTexture, Vector2f point, const View* view)
-    
     cdef void RenderTexture_draw_sprite 'sfRenderTexture_drawSprite' (RenderTexture* renderTexture, const Sprite* object, const RenderStates* states)
     cdef void RenderTexture_draw_text 'sfRenderTexture_drawText' (RenderTexture* renderTexture, const Text* object, const RenderStates* states)
     cdef void RenderTexture_draw_shape 'sfRenderTexture_drawShape' (RenderTexture* renderTexture, const Shape* object, const RenderStates* states)
@@ -516,7 +497,6 @@ cdef extern from 'SFML/Graphics/RenderTexture.h' nogil:
     cdef void RenderTexture_draw_convex_shape 'sfRenderTexture_drawConvexShape' (RenderTexture* renderTexture, const ConvexShape* object, const RenderStates* states)
     cdef void RenderTexture_draw_rectangle_shape 'sfRenderTexture_drawRectangleShape' (RenderTexture* renderTexture, const RectangleShape* object, const RenderStates* states)
     cdef void RenderTexture_draw_vertex_array 'sfRenderTexture_drawVertexArray' (RenderTexture* renderTexture, const VertexArray* object, const RenderStates* states)
-    
     cdef void RenderTexture_draw_primitives 'sfRenderTexture_drawPrimitives' (RenderTexture* renderTexture, const Vertex* vertices, unsigned int vertexCount, PrimitiveType type, RenderStates* states)
     cdef void RenderTexture_push_GL_states 'sfRenderTexture_pushGLStates' (RenderTexture* renderTexture)    
     cdef void RenderTexture_pop_GL_states 'sfRenderTexture_popGLStates' (RenderTexture* renderTexture)
@@ -532,7 +512,6 @@ cdef extern from 'SFML/Graphics/RenderTexture.h' nogil:
 ################################################################################
 
 cdef extern from 'SFML/Graphics/RenderWindow.h' nogil:
-    
     cdef RenderWindow* RenderWindow_create 'sfRenderWindow_create' (VideoMode mode, const char* title, Uint32 style, const ContextSettings* settings)
     # TODO: createUnicode
     # TODO: createFromHandle
@@ -544,10 +523,8 @@ cdef extern from 'SFML/Graphics/RenderWindow.h' nogil:
     cdef bint RenderWindow_wait_event 'sfRenderWindow_waitEvent' (const RenderWindow* window, Event* event)
     cdef Vector2i RenderWindow_get_position 'sfRenderWindow_getPosition' (const RenderWindow* window)
     cdef void RenderWindow_set_position 'sfRenderWindow_setPosition' (RenderWindow* window, Vector2i position)
-    
     cdef Vector2u RenderWindow_get_size 'sfRenderWindow_getSize' (RenderWindow* window)
     cdef void RenderWindow_set_size 'sfRenderWindow_setSize' (RenderWindow* window, Vector2u size)
-
     cdef void RenderWindow_set_title 'sfRenderWindow_setTitle' (RenderWindow* window, const char* title)
     cdef void RenderWindow_set_unicode_title 'sfRenderWindow_setUnicodeTitle' (RenderWindow* window, Uint32* title)
     cdef void RenderWindow_set_icon 'sfRenderWindow_setIcon' (RenderWindow* window, unsigned int width, unsigned int height, const unsigned char* pixels)
@@ -561,13 +538,11 @@ cdef extern from 'SFML/Graphics/RenderWindow.h' nogil:
     cdef void RenderWindow_set_joystick_threshold 'sfRenderWindow_setJoystickThreshold' (RenderWindow* window, float threshold)
     cdef void RenderWindow_clear 'sfRenderWindow_clear' (RenderWindow* window, Color color)
     cdef void RenderWindow_set_view 'sfRenderWindow_setView' (RenderWindow* window, const View* view)
-    
     cdef const View* RenderWindow_get_view 'sfRenderWindow_getView' (const RenderWindow* window)
     cdef const View* RenderWindow_get_default_view 'sfRenderWindow_getDefaultView' (const RenderWindow* window)
     cdef IntRect RenderWindow_get_viewport 'sfRenderWindow_getViewport' (const RenderWindow* renderWindow, const View* view)
     cdef Vector2f RenderWindow_map_pixel_to_coords 'sfRenderWindow_mapPixelToCoords' (const RenderWindow* renderWindow, Vector2i point, const View* view)
     cdef Vector2i RenderWindow_map_coords_to_pixel 'sfRenderWindow_mapCoordsToPixel' (const RenderWindow* renderWindow, Vector2f point, const View* view)
-    
     cdef void RenderWindow_draw_sprite 'sfRenderWindow_drawSprite' (RenderWindow* renderWindow, const Sprite* object, const RenderStates* states)
     cdef void RenderWindow_draw_text 'sfRenderWindow_drawText' (RenderWindow* renderWindow, const Text* object, const RenderStates* states)
     cdef void RenderWindow_draw_shape 'sfRenderWindow_drawShape' (RenderWindow* renderWindow, const Shape* object, const RenderStates* states)
@@ -575,12 +550,10 @@ cdef extern from 'SFML/Graphics/RenderWindow.h' nogil:
     cdef void RenderWindow_draw_convex_shape 'sfRenderWindow_drawConvexShape' (RenderWindow* renderWindow, const ConvexShape* object, const RenderStates* states)
     cdef void RenderWindow_draw_rectangle_shape 'sfRenderWindow_drawRectangleShape' (RenderWindow* renderWindow, const RectangleShape* object, const RenderStates* states)
     cdef void RenderWindow_draw_vertex_array 'sfRenderWindow_drawVertexArray' (RenderWindow* renderWindow, const VertexArray* object, const RenderStates* states)
-    
     cdef void RenderWindow_draw_primitives 'sfRenderWindow_drawPrimitives' (RenderWindow* renderWindow, const Vertex* vertices, unsigned int vertexCount, PrimitiveType type, RenderStates* states)
     cdef void RenderWindow_push_GL_states 'sfRenderWindow_pushGLStates' (RenderWindow* renderWindow)
     cdef void RenderWindow_pop_GL_states 'sfRenderWindow_popGLStates' (RenderWindow* renderWindow)
     cdef void RenderWindow_reset_GL_states 'sfRenderWindow_resetGLStates' (RenderWindow* renderWindow)
-    
     cdef Image* RenderWindow_capture 'sfRenderWindow_capture' (const RenderWindow* renderWindow)
     cdef Vector2i Mouse_get_position_render_window 'sfRenderWindow_getPositionRenderWindow' (const RenderWindow* relativeTo)
     cdef void Mouse_set_position_render_window 'sfRenderWindow_setPositionRenderWindow' (Vector2i position, const RenderWindow* relativeTo)

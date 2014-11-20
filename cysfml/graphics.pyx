@@ -459,7 +459,10 @@ cpdef cgraphics.Vertex Vertex_cast(value): #position, color, tex_coords):
     return vertex
 
 
-cpdef cgraphics.Vertex Vertex(csystem.Vector2f position, cgraphics.Color color, csystem.Vector2f tex_coords):
+cpdef cgraphics.Vertex Vertex(
+        csystem.Vector2f position,
+        cgraphics.Color color,
+        csystem.Vector2f tex_coords=system.Vector2f(0, 0)):
     cdef cgraphics.Vertex vertex
     vertex.position = position
     vertex.color = color
@@ -467,7 +470,7 @@ cpdef cgraphics.Vertex Vertex(csystem.Vector2f position, cgraphics.Color color, 
     return vertex
 
 
-cpdef cgraphics.Vertex Vertex_from_args(float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x, float tex_y):
+cpdef cgraphics.Vertex Vertex_from_args(float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x=0, float tex_y=0):
     cdef cgraphics.Vertex vertex
     vertex.position = system.Vector2f(x, y)
     vertex.color = Color_from_rgba(r, g, b, a)
@@ -681,7 +684,7 @@ cdef class TransformableWrapper:
             return system.Vector2f_unpack(cgraphics.Transformable_get_position(self.Transformable))
         
         def __set__(TransformableWrapper self, position):
-            cgraphics.Transformable_set_scale(self.Transformable, system.Vector2f_cast(position))
+            cgraphics.Transformable_set_position(self.Transformable, system.Vector2f_cast(position))
 
     # rotation
     
@@ -1111,6 +1114,16 @@ cdef class TextureWrapper:
         def __get__(TextureWrapper self):
             return system.Vector2u_unpack(cgraphics.Texture_get_size(self.Texture))
     
+    # width
+    
+    cpdef unsigned int get_width(TextureWrapper self):
+        return cgraphics.Texture_get_size(self.Texture).x
+    
+    # height
+    
+    cpdef unsigned int get_height(TextureWrapper self):
+        return cgraphics.Texture_get_size(self.Texture).y
+    
     # smooth
     
     cpdef bint is_smooth(TextureWrapper self):
@@ -1143,10 +1156,10 @@ cdef class TextureWrapper:
     
     # Special methods
     
-    def __dealloc__(TextureWrapper self):
-        # Do we want to automatically deallocate?
-        if self.Texture:
-            cgraphics.Texture_destroy(self.Texture)
+    #def __dealloc__(TextureWrapper self):
+        ## Do we want to automatically deallocate?
+        #if self.Texture:
+            #cgraphics.Texture_destroy(self.Texture)
 
 
 cdef class Texture(TextureWrapper):
@@ -1198,7 +1211,7 @@ cdef class VertexArrayWrapper(Drawable):
     cpdef append_struct(VertexArrayWrapper self, cgraphics.Vertex vertex):
         cgraphics.VertexArray_append(self.VertexArray, vertex)
     
-    cpdef append_args(VertexArrayWrapper self, float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x, float tex_y):
+    cpdef append_args(VertexArrayWrapper self, float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x=0, float tex_y=0):
         cgraphics.VertexArray_append(self.VertexArray, Vertex_from_args(x, y, r, g, b, a, tex_x, tex_y))
     
     # get_vertex
@@ -1245,10 +1258,16 @@ cdef class VertexArrayWrapper(Drawable):
         cgraphics.RenderWindow_draw_vertex_array(render_window.RenderWindow, self.VertexArray, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(VertexArrayWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_vertex_array(
             render_window.RenderWindow,
             self.VertexArray,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
     
     # bounds
@@ -1429,8 +1448,18 @@ cdef class ShapeWrapper(Drawable):
     
     # texture
     
-    cpdef set_texture(ShapeWrapper self, Texture texture, bint reset_rect):
+    cpdef TextureWrapper get_texture(ShapeWrapper self):
+        return Texture_wrap_ptr(cgraphics.Shape_get_texture(self.Shape))
+    
+    cpdef set_texture(ShapeWrapper self, TextureWrapper texture, bint reset_rect=False):
         cgraphics.Shape_set_texture(self.Shape, texture.Texture, reset_rect)
+    
+    property texture:
+        def __get__(ShapeWrapper self):
+            return Texture_wrap_ptr(cgraphics.Shape_get_texture(self.Shape))
+        
+        def __set__(ShapeWrapper self, TextureWrapper texture):
+            cgraphics.Shape_set_texture(self.Shape, texture.Texture, False)
     
     # fill_color
     
@@ -1512,15 +1541,6 @@ cdef class ShapeWrapper(Drawable):
         
         def __set__(ShapeWrapper self, float thickness):
             cgraphics.Shape_set_outline_thickness(self.Shape, thickness)
-    
-    # texture
-    
-    cpdef Texture get_texture(ShapeWrapper self):
-        return Texture_wrap_ptr(cgraphics.Shape_get_texture(self.Shape))
-    
-    property texture:
-        def __get__(ShapeWrapper self):
-            return Texture_wrap_ptr(cgraphics.Shape_get_texture(self.Shape))
     
     # texture_rect
     
@@ -1642,10 +1662,16 @@ cdef class ShapeWrapper(Drawable):
         cgraphics.RenderWindow_draw_shape(render_window.RenderWindow, self.Shape, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(ShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_shape(
             render_window.RenderWindow,
             self.Shape,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
 
 
@@ -1876,8 +1902,18 @@ cdef class CircleShapeWrapper(Drawable):
     
     # texture
     
-    cpdef Texture get_texture(CircleShapeWrapper self):
+    cpdef TextureWrapper get_texture(CircleShapeWrapper self):
         return Texture_wrap_ptr(cgraphics.CircleShape_get_texture(self.CircleShape))
+    
+    cpdef set_texture(CircleShapeWrapper self, TextureWrapper texture, bint reset_rect=False):
+        cgraphics.CircleShape_set_texture(self.CircleShape, texture.Texture, reset_rect)
+    
+    property texture:
+        def __get__(CircleShapeWrapper self):
+            return Texture_wrap_ptr(cgraphics.CircleShape_get_texture(self.CircleShape))
+        
+        def __set__(CircleShapeWrapper self, TextureWrapper texture):
+            cgraphics.CircleShape_set_texture(self.CircleShape, texture.Texture, False)
     
     # texture_rect
     
@@ -1889,6 +1925,22 @@ cdef class CircleShapeWrapper(Drawable):
     
     cpdef tuple get_texture_rect_ltwh(CircleShapeWrapper self):
         return IntRect_unpack(cgraphics.CircleShape_get_texture_rect(self.CircleShape))
+    
+    cpdef set_texture_rect(CircleShapeWrapper self, rect):
+        cgraphics.CircleShape_set_texture_rect(self.CircleShape, IntRect_cast(rect))
+    
+    cpdef set_texture_rect_struct(CircleShapeWrapper self, cgraphics.IntRect rect):
+        cgraphics.CircleShape_set_texture_rect(self.CircleShape, rect)
+    
+    cpdef set_texture_rect_ltwh(CircleShapeWrapper self, int left, int top, int width, int height):
+        cgraphics.CircleShape_set_texture_rect(self.CircleShape, IntRect(left, top, width, height))
+    
+    property texture_rect:
+        def __get__(CircleShapeWrapper self):
+            return IntRect_unpack(cgraphics.CircleShape_get_texture_rect(self.CircleShape))
+        
+        def __set__(CircleShapeWrapper self, rect):
+            cgraphics.CircleShape_set_texture_rect(self.CircleShape, IntRect_cast(rect))
     
     # point_count
     
@@ -1990,27 +2042,22 @@ cdef class CircleShapeWrapper(Drawable):
     cpdef scale_relative_xy(CircleShapeWrapper self, float x, float y):
         cgraphics.CircleShape_scale(self.CircleShape, system.Vector2f(x, y))
     
-    # set_texture
-    
-    cpdef set_texture(CircleShapeWrapper self, Texture texture, bint reset_rect):
-        cgraphics.CircleShape_set_texture(self.CircleShape, texture.Texture, reset_rect)
-    
-    cpdef set_texture_rect(CircleShapeWrapper self, cgraphics.IntRect rect):
-        cgraphics.CircleShape_set_texture_rect(self.CircleShape, rect)
-    
-    cpdef set_texture_rect_ltwh(CircleShapeWrapper self, int left, int top, int width, int height):
-        cgraphics.CircleShape_set_texture_rect(self.CircleShape, IntRect(left, top, width, height))
-    
     # drawing
     
     cpdef draw(CircleShapeWrapper self, RenderWindowWrapper render_window):
         cgraphics.RenderWindow_draw_circle_shape(render_window.RenderWindow, self.CircleShape, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(CircleShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_circle_shape(
             render_window.RenderWindow,
             self.CircleShape,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
 
 
@@ -2164,17 +2211,6 @@ cdef class ConvexShapeWrapper(Drawable):
     cpdef scale_relative_xy(ConvexShapeWrapper self, float x, float y):
         cgraphics.ConvexShape_scale(self.ConvexShape, system.Vector2f(x, y))
     
-    # set_texture
-    
-    cpdef set_texture(ConvexShapeWrapper self, Texture texture, bint reset_rect):
-        cgraphics.ConvexShape_set_texture(self.ConvexShape, texture.Texture, reset_rect)
-    
-    cpdef set_texture_rect(ConvexShapeWrapper self, cgraphics.IntRect rect):
-        cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, rect)
-    
-    cpdef set_texture_rect_ltwh(ConvexShapeWrapper self, int left, int top, int width, int height):
-        cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, IntRect(left, top, width, height))
-    
     # fill_color
     
     cpdef tuple get_fill_color(ConvexShapeWrapper self):
@@ -2258,9 +2294,18 @@ cdef class ConvexShapeWrapper(Drawable):
     
     # texture
     
-    
-    cpdef Texture get_texture(ConvexShapeWrapper self):
+    cpdef TextureWrapper get_texture(ConvexShapeWrapper self):
         return Texture_wrap_ptr(cgraphics.ConvexShape_get_texture(self.ConvexShape))
+    
+    cpdef set_texture(ConvexShapeWrapper self, TextureWrapper texture, bint reset_rect=False):
+        cgraphics.ConvexShape_set_texture(self.ConvexShape, texture.Texture, reset_rect)
+    
+    property texture:
+        def __get__(ConvexShapeWrapper self):
+            return Texture_wrap_ptr(cgraphics.ConvexShape_get_texture(self.ConvexShape))
+        
+        def __set__(ConvexShapeWrapper self, TextureWrapper texture):
+            cgraphics.ConvexShape_set_texture(self.ConvexShape, texture.Texture, False)
     
     # texture_rect
     
@@ -2272,6 +2317,22 @@ cdef class ConvexShapeWrapper(Drawable):
     
     cpdef tuple get_texture_rect_ltwh(ConvexShapeWrapper self):
         return IntRect_unpack(cgraphics.ConvexShape_get_texture_rect(self.ConvexShape))
+    
+    cpdef set_texture_rect(ConvexShapeWrapper self, rect):
+        cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, IntRect_cast(rect))
+    
+    cpdef set_texture_rect_struct(ConvexShapeWrapper self, cgraphics.IntRect rect):
+        cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, rect)
+    
+    cpdef set_texture_rect_ltwh(ConvexShapeWrapper self, int left, int top, int width, int height):
+        cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, IntRect(left, top, width, height))
+    
+    property texture_rect:
+        def __get__(ConvexShapeWrapper self):
+            return cgraphics.ConvexShape_get_texture_rect(self.ConvexShape)
+        
+        def __set__(ConvexShapeWrapper self, rect):
+            cgraphics.ConvexShape_set_texture_rect(self.ConvexShape, IntRect_cast(rect))
     
     # point_count
     
@@ -2346,10 +2407,16 @@ cdef class ConvexShapeWrapper(Drawable):
         cgraphics.RenderWindow_draw_convex_shape(render_window.RenderWindow, self.ConvexShape, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(ConvexShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_convex_shape(
             render_window.RenderWindow,
             self.ConvexShape,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
 
 
@@ -2509,17 +2576,6 @@ cdef class RectangleShapeWrapper(Drawable):
         cdef cgraphics.Transform transform = cgraphics.RectangleShape_get_inverse_transform(self.RectangleShape)
         return Transform_wrap_ptr(&transform)
     
-    # set_texture
-    
-    cpdef set_texture(RectangleShapeWrapper self, Texture texture, bint reset_rect):
-        cgraphics.RectangleShape_set_texture(self.RectangleShape, texture.Texture, reset_rect)
-    
-    cpdef set_texture_rect(RectangleShapeWrapper self, cgraphics.IntRect rect):
-        cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, rect)
-    
-    cpdef set_texture_rect_ltwh(RectangleShapeWrapper self, int left, int top, int width, int height):
-        cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, IntRect(left, top, width, height))
-    
     # fill_color
     
     cpdef tuple get_fill_color(RectangleShapeWrapper self):
@@ -2603,12 +2659,22 @@ cdef class RectangleShapeWrapper(Drawable):
     
     # texture
     
-    cpdef Texture get_texture(RectangleShapeWrapper self):
+    cpdef TextureWrapper get_texture(RectangleShapeWrapper self):
         return Texture_wrap_ptr(cgraphics.RectangleShape_get_texture(self.RectangleShape))
+    
+    cpdef set_texture(RectangleShapeWrapper self, TextureWrapper texture, bint reset_rect=False):
+        cgraphics.RectangleShape_set_texture(self.RectangleShape, texture.Texture, reset_rect)
+    
+    property texture:
+        def __get__(RectangleShapeWrapper self):
+            return Texture_wrap_ptr(cgraphics.RectangleShape_get_texture(self.RectangleShape))
+        
+        def __set__(RectangleShapeWrapper self, TextureWrapper texture):
+            cgraphics.RectangleShape_set_texture(self.RectangleShape, texture.Texture, False)
     
     # texture_rect
     
-    cpdef cgraphics.IntRect get_texture_rect(RectangleShapeWrapper self):
+    cpdef tuple get_texture_rect(RectangleShapeWrapper self):
         return IntRect_unpack(cgraphics.RectangleShape_get_texture_rect(self.RectangleShape))
     
     cpdef cgraphics.IntRect get_texture_rect_struct(RectangleShapeWrapper self):
@@ -2616,6 +2682,22 @@ cdef class RectangleShapeWrapper(Drawable):
     
     cpdef tuple get_texture_rect_ltwh(RectangleShapeWrapper self):
         return IntRect_unpack(cgraphics.RectangleShape_get_texture_rect(self.RectangleShape))
+    
+    cpdef set_texture_rect(RectangleShapeWrapper self, rect):
+        cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, IntRect_cast(rect))
+    
+    cpdef set_texture_rect_struct(RectangleShapeWrapper self, cgraphics.IntRect rect):
+        cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, rect)
+    
+    cpdef set_texture_rect_ltwh(RectangleShapeWrapper self, int left, int top, int width, int height):
+        cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, IntRect(left, top, width, height))
+    
+    property texture_rect:
+        def __get__(RectangleShapeWrapper self):
+            return IntRect_unpack(cgraphics.RectangleShape_get_texture_rect(self.RectangleShape))
+        
+        def __set__(RectangleShapeWrapper self, rect):
+            cgraphics.RectangleShape_set_texture_rect(self.RectangleShape, IntRect_cast(rect))
     
     # get_point_count
     
@@ -2700,10 +2782,16 @@ cdef class RectangleShapeWrapper(Drawable):
         cgraphics.RenderWindow_draw_rectangle_shape(render_window.RenderWindow, self.RectangleShape, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(RectangleShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_rectangle_shape(
             render_window.RenderWindow,
             self.RectangleShape,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
 
 
@@ -2725,7 +2813,7 @@ cdef SpriteWrapper Sprite_create():
     return Sprite_wrap_ptr(cgraphics.Sprite_create())
 
 
-cdef SpriteWrapper Sprite_from_texture(Texture texture):
+cdef SpriteWrapper Sprite_from_texture(TextureWrapper texture):
     cdef cgraphics.Sprite* sprite_ptr = cgraphics.Sprite_create()
     cgraphics.Sprite_set_texture(sprite_ptr, texture.Texture, False)
     return Sprite_wrap_ptr(sprite_ptr)
@@ -2738,6 +2826,16 @@ cdef SpriteWrapper Sprite_from_file(const char* filename):
 
 
 cdef class SpriteWrapper(Drawable):
+    # Python constructors
+    
+    @staticmethod
+    def from_texture(TextureWrapper texture):
+        return Sprite_from_texture(texture)
+    
+    @staticmethod
+    def from_file(const char* filename):
+        return Sprite_from_file(filename)
+    
     # Cython methods
     
     cpdef SpriteWrapper copy(SpriteWrapper self):
@@ -2885,14 +2983,14 @@ cdef class SpriteWrapper(Drawable):
     cpdef TextureWrapper get_texture(SpriteWrapper self):
         return Texture_wrap_ptr(cgraphics.Sprite_get_texture(self.Sprite))
     
-    cpdef set_texture(SpriteWrapper self, Texture texture, bint reset_rect):
+    cpdef set_texture(SpriteWrapper self, TextureWrapper texture, bint reset_rect=False):
         cgraphics.Sprite_set_texture(self.Sprite, texture.Texture, reset_rect)
     
     property texture:
         def __get__(SpriteWrapper self):
             return Texture_wrap_ptr(cgraphics.Sprite_get_texture(self.Sprite))
     
-        def __set__(SpriteWrapper self, Texture texture):
+        def __set__(SpriteWrapper self, TextureWrapper texture):
             cgraphics.Sprite_set_texture(self.Sprite, texture.Texture, False)
     
     # texture_rect
@@ -3003,12 +3101,17 @@ cdef class SpriteWrapper(Drawable):
         cgraphics.RenderWindow_draw_sprite(render_window.RenderWindow, self.Sprite, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(SpriteWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_sprite(
             render_window.RenderWindow,
             self.Sprite,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
-
 
 cdef class Sprite(SpriteWrapper):
     def __cinit__(Sprite self):
@@ -3374,10 +3477,16 @@ cdef class TextWrapper(Drawable):
         cgraphics.RenderWindow_draw_text(render_window.RenderWindow, self.Text, RENDER_STATES_DEFAULT_PTR)
     
     cdef draw_transform_struct(TextWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform):
+        cdef cgraphics.RenderStates render_states
+        render_states.blend_mode = cgraphics.BLEND_ALPHA
+        render_states.transform = transform
+        render_states.texture = NULL
+        render_states.shader = NULL
+        
         cgraphics.RenderWindow_draw_text(
             render_window.RenderWindow,
             self.Text,
-            RenderStates_ptr_from_transform(transform),
+            &render_states,
         )
     
     # Special methods
@@ -3715,17 +3824,17 @@ cdef class RenderStates:
     
     # texture
     
-    cpdef Texture get_texture(RenderStates self):
+    cpdef TextureWrapper get_texture(RenderStates self):
         return Texture_wrap_ptr(self.RenderStates.texture)
     
-    cpdef set_texture(RenderStates self, Texture texture):
+    cpdef set_texture(RenderStates self, TextureWrapper texture):
         self.RenderStates.texture = texture.Texture
     
     property texture:
         def __get__(RenderStates self):
             return Texture_wrap_ptr(self.RenderStates.texture)
         
-        def __set__(RenderStates self, Texture texture):
+        def __set__(RenderStates self, TextureWrapper texture):
             self.RenderStates.texture = texture.Texture
     
     # shader
@@ -4242,12 +4351,12 @@ cdef class RenderWindowWrapper:
     
     # repeat_key_enabled
     
-    cpdef set_repeat_key_enabled(RenderWindowWrapper self, bint enabled):
-        cgraphics.RenderWindow_set_repeat_key_enabled(enabled)
+    cpdef set_key_repeat(RenderWindowWrapper self, bint enabled):
+        cgraphics.RenderWindow_set_key_repeat_enabled(self.RenderWindow, enabled)
     
-    property repeat_key_enabled:
+    property key_repeat:
         def __set__(RenderWindowWrapper self, bint enabled):
-            cgraphics.RenderWindow_set_repeat_key_enabled(enabled)
+            cgraphics.RenderWindow_set_key_repeat_enabled(self.RenderWindow, enabled)
     
     # framerate_limit
     
@@ -4299,8 +4408,17 @@ cdef RenderWindowWrapper RenderWindow_create(
         window.VideoMode video_mode,
         const char* title,
         Uint32 style=cwindow.WINDOW_STYLE_DEFAULT):
-    cdef cwindow.ContextSettings context_settings = cwindow.ContextSettings_create()
+    cdef cwindow.ContextSettings context_settings = cwindow.ContextSettings()
     return RenderWindow_wrap_ptr(cgraphics.RenderWindow_create(video_mode.VideoMode, title, style, &context_settings))
+
+
+cdef RenderWindowWrapper RenderWindow_from_struct(
+        cwindow.VideoMode video_mode,
+        const char* title,
+        Uint32 style=cwindow.WINDOW_STYLE_DEFAULT):
+    cdef cwindow.ContextSettings context_settings = cwindow.ContextSettings()
+    cdef cgraphics.RenderWindow* render_window_ptr = cgraphics.RenderWindow_create(video_mode, title, style, &context_settings)
+    return RenderWindow_wrap_ptr(render_window_ptr)
 
 
 cdef RenderWindowWrapper RenderWindow_wrap_ptr(cgraphics.RenderWindow* render_window_ptr):

@@ -132,8 +132,8 @@ cpdef tuple Color_modulate_rgba(
 ################################################################################
 
 cpdef cgraphics.Vertex Vertex_cast(value) # position, color, tex_coords)
-cpdef cgraphics.Vertex Vertex(csystem.Vector2f position, cgraphics.Color color, csystem.Vector2f tex_coords)
-cpdef cgraphics.Vertex Vertex_from_args(float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x, float tex_y)
+cpdef cgraphics.Vertex Vertex(csystem.Vector2f position, cgraphics.Color color, csystem.Vector2f tex_coords=*)
+cpdef cgraphics.Vertex Vertex_from_args(float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x=*, float tex_y=*)
 
 
 # Transform
@@ -335,6 +335,8 @@ cdef class TextureWrapper:
     cpdef tuple get_size(TextureWrapper self)
     cpdef csystem.Vector2u get_size_struct(TextureWrapper self)
     cpdef tuple get_size_xy(TextureWrapper self)
+    cpdef unsigned int get_width(TextureWrapper self)
+    cpdef unsigned int get_height(TextureWrapper self)
     # smooth
     cpdef bint is_smooth(TextureWrapper self)
     cpdef set_smooth(TextureWrapper self, bint smooth)
@@ -372,7 +374,7 @@ cdef class VertexArrayWrapper(Drawable):
     # append
     cpdef append(VertexArrayWrapper self, vertex)
     cpdef append_struct(VertexArrayWrapper self, cgraphics.Vertex vertex)
-    cpdef append_args(VertexArrayWrapper self, float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x, float tex_y)
+    cpdef append_args(VertexArrayWrapper self, float x, float y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, float tex_x=*, float tex_y=*)
     # Attributes
     # vertex_count
     cpdef unsigned int get_vertex_count(VertexArrayWrapper self)
@@ -432,7 +434,8 @@ cdef class ShapeWrapper(Drawable):
     # inverse_transform
     cpdef Transform get_inverse_transform(ShapeWrapper self)
     # texture
-    cpdef set_texture(ShapeWrapper self, Texture texture, bint reset_rect)
+    cpdef TextureWrapper get_texture(ShapeWrapper self)
+    cpdef set_texture(ShapeWrapper self, TextureWrapper texture, bint reset_rect=*)
     # fill_color
     cpdef tuple get_fill_color(ShapeWrapper self)
     cpdef cgraphics.Color get_fill_color_struct(ShapeWrapper self)
@@ -454,8 +457,6 @@ cdef class ShapeWrapper(Drawable):
     # outline_thickness
     cpdef float get_outline_thickness(ShapeWrapper self)
     cpdef set_outline_thickness(ShapeWrapper self, float thickness)
-    # texture
-    cpdef Texture get_texture(ShapeWrapper self)
     # texture_rect
     cpdef tuple get_texture_rect(ShapeWrapper self)
     cpdef cgraphics.IntRect get_texture_rect_struct(ShapeWrapper self)
@@ -562,11 +563,15 @@ cdef class CircleShapeWrapper(Drawable):
     cpdef float get_outline_thickness(CircleShapeWrapper self)
     cpdef set_outline_thickness(CircleShapeWrapper self, float thickness)
     # texture
-    cpdef Texture get_texture(CircleShapeWrapper self)
+    cpdef TextureWrapper get_texture(CircleShapeWrapper self)
+    cpdef set_texture(CircleShapeWrapper self, TextureWrapper texture, bint reset_rect=*)
     # texture_rect
     cpdef tuple get_texture_rect(CircleShapeWrapper self)
     cpdef cgraphics.IntRect get_texture_rect_struct(CircleShapeWrapper self)
     cpdef tuple get_texture_rect_ltwh(CircleShapeWrapper self)
+    cpdef set_texture_rect(CircleShapeWrapper self, rect)
+    cpdef set_texture_rect_struct(CircleShapeWrapper self, cgraphics.IntRect rect)
+    cpdef set_texture_rect_ltwh(CircleShapeWrapper self, int left, int top, int width, int height)
     # point_count
     cpdef unsigned int get_point_count(CircleShapeWrapper self)
     cpdef set_point_count(CircleShapeWrapper self, unsigned int count)
@@ -596,10 +601,6 @@ cdef class CircleShapeWrapper(Drawable):
     cpdef scale_relative(CircleShapeWrapper self, scale)
     cpdef scale_relative_struct(CircleShapeWrapper self, csystem.Vector2f scale)
     cpdef scale_relative_xy(CircleShapeWrapper self, float x, float y)
-    # set_texture
-    cpdef set_texture(CircleShapeWrapper self, Texture texture, bint reset_rect)
-    cpdef set_texture_rect(CircleShapeWrapper self, cgraphics.IntRect rect)
-    cpdef set_texture_rect_ltwh(CircleShapeWrapper self, int left, int top, int width, int height)
     # drawing
     cpdef draw(CircleShapeWrapper self, RenderWindowWrapper render_window)
     cdef draw_transform_struct(CircleShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform)
@@ -658,10 +659,6 @@ cdef class ConvexShapeWrapper(Drawable):
     cpdef scale_relative(ConvexShapeWrapper self, scale)
     cpdef scale_relative_struct(ConvexShapeWrapper self, csystem.Vector2f scale)
     cpdef scale_relative_xy(ConvexShapeWrapper self, float x, float y)
-    # set_texture
-    cpdef set_texture(ConvexShapeWrapper self, Texture texture, bint reset_rect)
-    cpdef set_texture_rect(ConvexShapeWrapper self, cgraphics.IntRect rect)
-    cpdef set_texture_rect_ltwh(ConvexShapeWrapper self, int left, int top, int width, int height)
     # fill_color
     cpdef tuple get_fill_color(ConvexShapeWrapper self)
     cpdef cgraphics.Color get_fill_color_struct(ConvexShapeWrapper self)
@@ -684,11 +681,16 @@ cdef class ConvexShapeWrapper(Drawable):
     cpdef float get_outline_thickness(ConvexShapeWrapper self)
     cpdef set_outline_thickness(ConvexShapeWrapper self, float thickness)
     # texture
-    cpdef Texture get_texture(ConvexShapeWrapper self)
+    cpdef TextureWrapper get_texture(ConvexShapeWrapper self)
+    cpdef set_texture(ConvexShapeWrapper self, TextureWrapper texture, bint reset_rect=*)
     # texture_rect
     cpdef tuple get_texture_rect(ConvexShapeWrapper self)
     cpdef cgraphics.IntRect get_texture_rect_struct(ConvexShapeWrapper self)
     cpdef tuple get_texture_rect_ltwh(ConvexShapeWrapper self)
+    cpdef set_texture_rect(ConvexShapeWrapper self, rect)
+    cpdef set_texture_rect_struct(ConvexShapeWrapper self, cgraphics.IntRect rect)
+    cpdef set_texture_rect_ltwh(ConvexShapeWrapper self, int left, int top, int width, int height)
+    
     # point_count
     cpdef unsigned int get_point_count(ConvexShapeWrapper self)
     cpdef set_point_count(ConvexShapeWrapper self, unsigned int count)
@@ -766,9 +768,12 @@ cdef class RectangleShapeWrapper(Drawable):
     cpdef Transform get_transform(RectangleShapeWrapper self)
     # inverse_transform
     cpdef Transform get_inverse_transform(RectangleShapeWrapper self)
-    # set_texture
-    cpdef set_texture(RectangleShapeWrapper self, Texture texture, bint reset_rect)
-    cpdef set_texture_rect(RectangleShapeWrapper self, cgraphics.IntRect rect)
+    # texture_rect
+    cpdef tuple get_texture_rect(RectangleShapeWrapper self)
+    cpdef cgraphics.IntRect get_texture_rect_struct(RectangleShapeWrapper self)
+    cpdef tuple get_texture_rect_ltwh(RectangleShapeWrapper self)
+    cpdef set_texture_rect(RectangleShapeWrapper self, rect)
+    cpdef set_texture_rect_struct(RectangleShapeWrapper self, cgraphics.IntRect rect)
     cpdef set_texture_rect_ltwh(RectangleShapeWrapper self, int left, int top, int width, int height)
     # fill_color
     cpdef tuple get_fill_color(RectangleShapeWrapper self)
@@ -792,11 +797,8 @@ cdef class RectangleShapeWrapper(Drawable):
     cpdef float get_outline_thickness(RectangleShapeWrapper self)
     cpdef set_outline_thickness(RectangleShapeWrapper self, float thickness)
     # texture
-    cpdef Texture get_texture(RectangleShapeWrapper self)
-    # texture_rect
-    cpdef cgraphics.IntRect get_texture_rect(RectangleShapeWrapper self)
-    cpdef cgraphics.IntRect get_texture_rect_struct(RectangleShapeWrapper self)
-    cpdef tuple get_texture_rect_ltwh(RectangleShapeWrapper self)
+    cpdef TextureWrapper get_texture(RectangleShapeWrapper self)
+    cpdef set_texture(RectangleShapeWrapper self, TextureWrapper texture, bint reset_rect=*)
     # get_point_count
     cpdef unsigned int get_point_count(RectangleShapeWrapper self)
     # get_point
@@ -818,7 +820,7 @@ cdef class RectangleShapeWrapper(Drawable):
     cpdef tuple get_global_bounds(RectangleShapeWrapper self)
     cpdef cgraphics.FloatRect get_global_bounds_struct(RectangleShapeWrapper self)
     cpdef tuple get_global_bounds_ltwh(RectangleShapeWrapper self)
-    ## drawing
+    # drawing
     cpdef draw(RectangleShapeWrapper self, RenderWindowWrapper render_window)
     cdef draw_transform_struct(RectangleShapeWrapper self, RenderWindowWrapper render_window, cgraphics.Transform transform)
 
@@ -832,7 +834,7 @@ cdef class RectangleShape(RectangleShapeWrapper):
 
 cdef SpriteWrapper Sprite_wrap_ptr(cgraphics.Sprite* sprite_ptr)
 cdef SpriteWrapper Sprite_create()
-cdef SpriteWrapper Sprite_from_texture(Texture texture)
+cdef SpriteWrapper Sprite_from_texture(TextureWrapper texture)
 cdef SpriteWrapper Sprite_from_file(const char* filename)
 
 
@@ -878,7 +880,7 @@ cdef class SpriteWrapper(Drawable):
     cpdef scale_relative_xy(SpriteWrapper self, float x, float y)
     # texture
     cpdef TextureWrapper get_texture(SpriteWrapper self)
-    cpdef set_texture(SpriteWrapper self, Texture texture, bint reset_rect)
+    cpdef set_texture(SpriteWrapper self, TextureWrapper texture, bint reset_rect=*)
     # texture_rect
     cpdef tuple get_texture_rect(SpriteWrapper self)
     cpdef cgraphics.IntRect get_texture_rect_struct(SpriteWrapper self)
@@ -1138,8 +1140,8 @@ cdef class RenderStates:
     cpdef Transform get_transform(RenderStates self)
     cpdef set_transform(RenderStates self, Transform transform)
     # texture
-    cpdef Texture get_texture(RenderStates self)
-    cpdef set_texture(RenderStates self, Texture texture)
+    cpdef TextureWrapper get_texture(RenderStates self)
+    cpdef set_texture(RenderStates self, TextureWrapper texture)
     # shader
     cpdef Shader get_shader(RenderStates self)
     cpdef set_shader(RenderStates self, Shader shader)
@@ -1299,8 +1301,8 @@ cdef class RenderWindowWrapper:
     cpdef set_vsync(RenderWindowWrapper self, bint vsync)
     # mouse_cursor_visible
     cpdef set_mouse_cursor_visible(RenderWindowWrapper self, bint visible)
-    # repeat_key_enabled
-    cpdef set_repeat_key_enabled(RenderWindowWrapper self, bint enabled)
+    # repeat_key
+    cpdef set_key_repeat(RenderWindowWrapper self, bint enabled)
     # framerate_limit
     cpdef set_framerate_limit(RenderWindowWrapper self, unsigned int limit)
     # joystick_threshold
@@ -1313,6 +1315,10 @@ cdef class RenderWindow(RenderWindowWrapper):
 
 cdef RenderWindowWrapper RenderWindow_create(
         window.VideoMode video_mode,
+        const char* title,
+        Uint32 style=*)
+cdef RenderWindowWrapper RenderWindow_from_struct(
+        cwindow.VideoMode video_mode,
         const char* title,
         Uint32 style=*)
 cdef RenderWindowWrapper RenderWindow_wrap_ptr(cgraphics.RenderWindow* render_window_ptr)
